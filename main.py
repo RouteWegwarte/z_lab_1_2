@@ -25,25 +25,31 @@ class Orders(BaseModel):
 def init():
     if not (Clients.table_exists() and Orders.table_exists()):
         db.create_tables([Clients, Orders])
+        print("Database base.db create")
     else:
         db.drop_tables([Clients, Orders])
         db.create_tables([Clients, Orders])
+        print("Database base.db dropped and recreated")
     db.close()
 
 def fill():
-    for i in range(20):
-        client = Clients.create(
-            name = random.choice(fnames) + " " + random.choice(snames),
-            city = random.choice(cities),
-            address = random.choice(addresses) + " " + str(random.randint(1, 255))
-        )
-    for i in range(20):
-        order = Orders.create(
-            clients = Clients.get_by_id(random.randint(1,10)),
-            date = datetime.datetime.now(),
-            amount = random.randint(1,10),
-            description = "zakaz"
-        )
+    if (Clients.table_exists() and Orders.table_exists()):
+        for i in range(20):
+            client = Clients.create(
+                name = random.choice(fnames) + " " + random.choice(snames),
+                city = random.choice(cities),
+                address = random.choice(addresses) + " " + str(random.randint(1, 255))
+            )
+        for i in range(20):
+            order = Orders.create(
+                clients = Clients.get_by_id(random.randint(1,10)),
+                date = datetime.datetime.now(),
+                amount = random.randint(1,10),
+                description = "zakaz"
+            )
+        print("Successfully filled")
+    else:
+        print("Database does not exist! Use main.py init to create")
 
 def show(Model):
     data = Model.select()
@@ -52,6 +58,7 @@ def show(Model):
             print(*("{:<30}".format(str(i)) for i in [inf.id, inf.name, inf.city, inf.address]))
         else:
             print(*("{:<30}".format(str(i)) for i in [inf.clients, inf.date, inf.amount, inf.description]))
+    print("Data showed")
 
 
 if __name__ == "__main__":
@@ -73,6 +80,6 @@ if __name__ == "__main__":
             except:
                 print("Input table name in args: main.py show Clients | main.py show Orders")
     except IndexError:
-        print("Error")
+        print("NO PARAMS")
 
 db.close()
